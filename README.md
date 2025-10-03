@@ -1,4 +1,4 @@
-# Exercise 3 – AWS Cloud Native App with Terraform
+# AWS Cloud Native App with Terraform
 
 This repository provisions a **cloud-native web application stack** on AWS using Terraform with user_data bootstrapping (no Ansible).  
 It includes network setup (VPC, subnets, NAT), bastion, ALB, ASG, frontend + API, and MongoDB.
@@ -85,3 +85,4 @@ To clean up resources:
 ```bash
 terraform destroy -var-file="terraform.tfvars"
 ```
+
