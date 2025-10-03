@@ -7,7 +7,7 @@ It includes network setup (VPC, subnets, NAT), bastion, ALB, ASG, frontend + API
 
 ## 📷 Architecture
 
-![Architecture Diagram] https://github.com/TheoMcCoy/aws-cloud-native-app/blob/main/docs/AWS-VPC-FullApp-TargetGrps.png 
+![Architecture Diagram](https://github.com/TheoMcCoy/aws-cloud-native-app/blob/main/docs/AWS-VPC-FullApp-TargetGrps.png)
 
 ---
 
@@ -34,3 +34,54 @@ It includes network setup (VPC, subnets, NAT), bastion, ALB, ASG, frontend + API
 ---
 
 ## 📂 File Structure
+├── main.tf
+├── variables.tf
+├── terraform.tfvars
+├── outputs.tf
+├── docs/
+│ └── architecture.png
+└── .gitignore
+
+---
+
+## ⚙️ Getting Started
+
+```bash
+# Clone the repo
+git clone https://github.com/<your-username>/exercise-3-cloud-native-app.git
+cd exercise-3-cloud-native-app
+
+# (Optional) Place architecture.png under docs/
+
+terraform init
+terraform plan -var-file="terraform.tfvars"
+terraform apply -var-file="terraform.tfvars"
+
+# After apply:
+terraform output alb_dns_name
+```
+Open http://<alb_dns_name> in your browser.
+
+## 🔐 Access & Debugging
+
+SSH to bastion:
+```bash
+ssh -i <your-key.pem> ec2-user@<bastion_public_ip>
+```
+
+From bastion, SSH into private instance:
+```bash
+ssh ec2-user@<private_instance_ip>
+```
+
+Inspect logs:
+
+sudo tail -f /var/log/userdata.log
+sudo systemctl status nginx
+
+## 🧹 Teardown
+
+To clean up resources:
+```bash
+terraform destroy -var-file="terraform.tfvars"
+```
