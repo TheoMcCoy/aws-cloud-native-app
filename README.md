@@ -7,7 +7,7 @@ It creates a secure VPC architecture spanning multiple availability zones, with 
 
 ## 📷 Architecture
 
-![Architecture Diagram](./docs/architecture.png)
+![Architecture Diagram](https://github.com/TheoMcCoy/aws-cloud-native-app/blob/main/docs/AWS-VPC-FullApp-TargetGrps.png)
 
 ---
 
@@ -65,3 +65,4 @@ terraform plan -var-file="terraform.tfvars"
 
 # Apply
 terraform apply -var-file="terraform.tfvars"
+
