@@ -64,25 +64,26 @@ Open http://<alb_dns_name> in your browser.
 
 ## 🔐 Access & Debugging
 
-SSH to bastion:
+1. SSH to bastion:
 ```bash
 ssh -i <your-key.pem> ec2-user@<bastion_public_ip>
 ```
 
-From bastion, SSH into private instance:
+2. From bastion, SSH into private instance:
 ```bash
 ssh ec2-user@<private_instance_ip>
 ```
 
-Inspect logs:
-
+3. Inspect logs:
+```bash
 sudo tail -f /var/log/userdata.log
 sudo systemctl status nginx
-
+```
 ## 🧹 Teardown
 
 To clean up resources:
 ```bash
 terraform destroy -var-file="terraform.tfvars"
 ```
+
 
