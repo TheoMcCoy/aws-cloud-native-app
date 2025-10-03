@@ -1,0 +1,29 @@
+# Terraform files
+*.tfstate
+*.tfstate.*
+crash.log
+*.tfvars.backup
+.terraform/
+.terraform.lock.hcl
+
+# Logs
+*.log
+
+# Sensitive files
+*.pem
+*.key
+*.crt
+
+# Ignore script folder
+scripts/
+script/
+src/
+srcipt/   # in case of typo folders
+
+# Ignore local configs
+*.tfvars
+*.tfvars.json
+
+# OS junk
+.DS_Store
+Thumbs.db

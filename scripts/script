@@ -1,0 +1,107 @@
+user_data = base64encode(<<-EOF
+    #!/bin/bash
+    yum -y update
+    amazon-linux-extras enable nginx1
+    yum install -y nginx jq
+    systemctl enable nginx
+    systemctl start nginx
+
+    ALB_DNS=${aws_lb.alb.dns_name}
+    MONGODB_PRIVATEIP=${aws_instance.mongodb.private_ip}
+
+    mkdir -p /tmp/cloudacademy-app
+    cd /tmp/cloudacademy-app
+
+    # Frontend
+    mkdir -p ./frontend && cd ./frontend
+    curl -sL https://api.github.com/repos/cloudacademy/voteapp-frontend-react-2020/releases/latest | jq -r '.assets[0].browser_download_url' | xargs curl -OL
+    INSTALL_FILENAME=$(curl -sL https://api.github.com/repos/cloudacademy/voteapp-frontend-react-2020/releases/latest | jq -r '.assets[0].name')
+    tar -xvzf $INSTALL_FILENAME
+    rm -rf /usr/share/nginx/html
+    cp -R build /usr/share/nginx/html
+    cat > /usr/share/nginx/html/env-config.js << EOFF
+    window._env_ = {REACT_APP_APIHOSTPORT: "$ALB_DNS"}
+    EOFF
+    cd ..
+
+    # API
+    mkdir -p ./api && cd ./api
+    curl -sL https://api.github.com/repos/cloudacademy/voteapp-api-go/releases/latest | jq -r '.assets[] | select(.name | contains("linux-amd64")) | .browser_download_url' | xargs curl -OL
+    INSTALL_FILENAME=$(curl -sL https://api.github.com/repos/cloudacademy/voteapp-api-go/releases/latest | jq -r '.assets[] | select(.name | contains("linux-amd64")) | .name')
+    tar -xvzf $INSTALL_FILENAME
+    nohup ./api --mongo mongodb://$MONGODB_PRIVATEIP:27017/langdb &
+
+    systemctl restart nginx
+  EOF
+  )
+
+      user_data = base64encode(<<-EOF
+    #!/bin/bash -xe
+
+    echo "=== Starting user_data script at $(date) ===" >> /var/log/userdata.log
+
+    # Wait for networking
+    sleep 15
+
+    # Update and install dependencies
+    yum update -y
+    amazon-linux-extras enable nginx1
+    yum clean metadata
+    yum install -y nginx jq git curl tar
+
+    # Enable and start nginx
+    systemctl enable nginx
+    systemctl start nginx
+
+    # Vars from Terraform
+    ALB_DNS="${aws_lb.alb.dns_name}"
+    MONGODB_PRIVATEIP="${aws_instance.mongodb.private_ip}"
+
+    mkdir -p /tmp/cloudacademy-app
+    cd /tmp/cloudacademy-app
+
+    ########################
+    # Frontend Setup
+    ########################
+    echo "=== Downloading and installing Frontend ===" >> /var/log/userdata.log
+    mkdir -p ./frontend && cd ./frontend
+
+    FRONTEND_URL=$(curl -sL https://api.github.com/repos/cloudacademy/voteapp-frontend-react-2020/releases/latest | jq -r '.assets[0].browser_download_url')
+    FRONTEND_FILE=$(curl -sL https://api.github.com/repos/cloudacademy/voteapp-frontend-react-2020/releases/latest | jq -r '.assets[0].name')
+
+    curl -OL $FRONTEND_URL
+    tar -xvzf $FRONTEND_FILE
+
+    WEBROOT="/usr/share/nginx/html"
+    rm -rf $${WEBROOT:?}/*
+    cp -R build/* $WEBROOT/
+
+    cat > $WEBROOT/env-config.js << EOFF
+    window._env_ = {REACT_APP_APIHOSTPORT: "$ALB_DNS"}
+    EOFF
+
+    cd ..
+
+    ########################
+    # API Setup
+    ########################
+    echo "=== Downloading and installing API ===" >> /var/log/userdata.log
+    mkdir -p ./api && cd ./api
+
+    API_URL=$(curl -sL https://api.github.com/repos/cloudacademy/voteapp-api-go/releases/latest | jq -r '.assets[] | select(.name | contains("linux-amd64")) | .browser_download_url')
+    API_FILE=$(curl -sL https://api.github.com/repos/cloudacademy/voteapp-api-go/releases/latest | jq -r '.assets[] | select(.name | contains("linux-amd64")) | .name')
+
+    curl -OL $API_URL
+    tar -xvzf $API_FILE
+
+    nohup ./api --mongo mongodb://$MONGODB_PRIVATEIP:27017/langdb &
+
+    ########################
+    # Restart nginx
+    ########################
+    systemctl restart nginx
+    systemctl status nginx >> /var/log/userdata.log 2>&1
+
+    echo "=== Finished user_data script at $(date) ===" >> /var/log/userdata.log
+EOF
+)
