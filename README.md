@@ -34,6 +34,7 @@ It includes network setup (VPC, subnets, NAT), bastion, ALB, ASG, frontend + API
 ---
 
 ## 📂 File Structure
+```bash
 ├── main.tf
 ├── variables.tf
 ├── terraform.tfvars
@@ -41,7 +42,7 @@ It includes network setup (VPC, subnets, NAT), bastion, ALB, ASG, frontend + API
 ├── docs/
 │ └── architecture.png
 └── .gitignore
-
+```
 ---
 
 ## ⚙️ Getting Started
@@ -85,5 +86,6 @@ To clean up resources:
 ```bash
 terraform destroy -var-file="terraform.tfvars"
 ```
+
 
 
